@@ -91,6 +91,7 @@ struct file_descriptor_t fd_table[FS_OPEN_MAX_COUNT];
 static bool error_free(const char *filename);
 static int  locate_file(const char* file_name);
 static bool is_open(const char* file_name);
+static bool is_important_file(const char* filename);
 static int  locate_avail_fd();
 static int  get_num_FAT_free_blocks();
 static int  count_num_open_dir();
@@ -246,7 +247,11 @@ Remove File:
 	2. Free associated data blocks
 */
 int fs_delete(const char *filename) {
-	
+
+    if (is_important_file(filename)){
+        fs_error("file is important. can't delete it");
+        return -1;
+    }
 	if (is_open(filename)) {
 		fs_error("file currently open");
 		return -1;
@@ -416,7 +421,12 @@ int fs_write(int fd, void *buf, size_t count) {
 	}
 
 	// find relative information about file 
-	char *file_name = fd_table[fd].file_name;				
+	char *file_name = fd_table[fd].file_name;
+    if (is_important_file(file_name)){
+        fs_error("file is important. can't write");
+        return -1;
+    }
+
 	int file_index = locate_file(file_name);				
 	int offset = fd_table[fd].offset;						
 
@@ -701,6 +711,20 @@ static bool is_open(const char* filename)
 	}
 
 	return false;
+}
+
+/*
+Is the file important?
+	1. A file is important if it started with 'lock'
+*/
+static bool is_important_file(const char* filename){
+    char important_file_tpl[4]; important_file_tpl[0]='l'; important_file_tpl[1]='o'; important_file_tpl[2]='c'; important_file_tpl[3]='k';
+    for(int i=0 ;i<4;i++){
+        if(filename[i]!=important_file_tpl[i]){
+            return false;
+        }
+    }
+    return true;
 }
 
 // helper: info

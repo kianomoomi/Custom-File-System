@@ -187,7 +187,7 @@ void thread_fs_add(void *arg)
 
 	/* Now, deal with our filesystem:
 	 * - mount, create a new file, copy content of host file into this new
-	 *   file, close the new file, and umount
+	 *   file, close the new file, and unmount
 	 */
 	if (fs_mount(diskname))
 		die("Cannot mount diskname");
