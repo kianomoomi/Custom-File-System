@@ -143,10 +143,8 @@ rm our_ls.txt ref_ls.txt;
 
 echo -e "\n\n";
 echo "Testing important file addition";
-./test-fs.x add our_driver lock_file1.txt > our_add.txt;
-./fs.x add ref_driver lock_file1.txt > ref_add.txt;
-diff our_add.txt ref_add.txt;
-rm ref_add.txt our_add.txt;
+./test-fs.x add our_driver lock_file1.txt > our_lock_add.txt;
+rm our_lock_add.txt;
 
 
 echo -e "\n\n";

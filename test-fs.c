@@ -204,6 +204,10 @@ void thread_fs_add(void *arg)
 	}
 
 	written = fs_write(fs_fd, buf, st.st_size);
+    if (written==-1){
+        fs_umount();
+        die("Cannot write file");
+    }
 
 	if (fs_close(fs_fd)) {
 		fs_umount();
