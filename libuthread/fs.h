@@ -58,7 +58,7 @@ int fs_info(void);
  * is too long, or if the root directory already contains %FS_FILE_MAX_COUNT
  * files. 0 otherwise.
  */
-int fs_create(const char *filename);
+int fs_create(const char *filename, void *buf, size_t count);
 
 /**
  * fs_delete - Delete a file
@@ -175,5 +175,7 @@ int fs_write(int fd, void *buf, size_t count);
  * open). Otherwise return the number of bytes actually read.
  */
 int fs_read(int fd, void *buf, size_t count);
+
+int find_fs_fd(char* filename);
 
 #endif /* _FS_H */

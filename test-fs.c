@@ -33,6 +33,14 @@ struct thread_arg {
 	char **argv;
 };
 
+int thread_find_fs_fd(char* filename){
+    int fd=find_fs_fd(filename);
+    if(fd==-1){
+        die("can't find fs_fd of file %s", filename);
+    }
+    return fd;
+}
+
 void thread_fs_stat(void *arg)
 {
 	struct thread_arg *t_arg = arg;
@@ -192,22 +200,12 @@ void thread_fs_add(void *arg)
 	if (fs_mount(diskname))
 		die("Cannot mount diskname");
 
-	if (fs_create(filename)) {
+	if (fs_create(filename, buf, st.st_size)) {
 		fs_umount();
 		die("Cannot create file");
 	}
 
-	fs_fd = fs_open(filename);
-	if (fs_fd < 0) {
-		fs_umount();
-		die("Cannot open file");
-	}
-
-	written = fs_write(fs_fd, buf, st.st_size);
-    if (written==-1){
-        fs_umount();
-        die("Cannot write file");
-    }
+    fs_fd = thread_find_fs_fd(filename);
 
 	if (fs_close(fs_fd)) {
 		fs_umount();

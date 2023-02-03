@@ -217,7 +217,7 @@ Create a new file:
 	2. The name needs to be set, and all other information needs to get reset.
 		2.2 Intitially the size is 0 and pointer to first data block is FAT_EOC.
 */
-int fs_create(const char *filename) {
+int fs_create(const char *filename, void *buf, size_t count) {
 
 	// perform error checking first 
 	if(error_free(filename) == false) {
@@ -226,18 +226,32 @@ int fs_create(const char *filename) {
 	}
 
 	// finds first available empty file
-	for(int i = 0; i < FS_FILE_MAX_COUNT; i++) {
+    int i=0;
+    for(i = 0; i < FS_FILE_MAX_COUNT; i++) {
 		if(root_dir_block[i].filename[0] == EMPTY) {	
 
 			// initialize file data 
 			strcpy(root_dir_block[i].filename, filename);
 			root_dir_block[i].file_size     = 0;
 			root_dir_block[i].start_data_block = EOC;
-
-			return 0;
+            break;
 		}
 	}
-	return -1;
+    if(i==FS_FILE_MAX_COUNT)return -1;
+
+    int fs_fd = fs_open(filename);
+    if (fs_fd < 0) {
+        fs_error("Cannot open file");
+        return -1;
+    }
+
+    size_t written = fs_write(fs_fd, buf, count);
+    if (written==-1){
+        fs_error("Cannot write file");
+        return -1;
+    }
+
+    return 0;
 }
 
 
@@ -261,7 +275,9 @@ int fs_delete(const char *filename) {
 	struct rootdirectory_t* the_dir = &root_dir_block[file_index]; 
 	int frst_dta_blk_i = the_dir->start_data_block;
 
-	while (frst_dta_blk_i != EOC) {
+    char bounce_buff[BLOCK_SIZE];
+    while (frst_dta_blk_i != EOC) {
+        block_write(frst_dta_blk_i + superblock->data_start_index, (void *) bounce_buff); //free data block
 		uint16_t tmp = FAT_blocks[frst_dta_blk_i].words;
 		FAT_blocks[frst_dta_blk_i].words = EMPTY;
 		frst_dta_blk_i = tmp;
@@ -402,6 +418,20 @@ int fs_lseek(int fd, size_t offset) {
 	fd_table[fd].offset = offset;
 	return 0;
 }
+
+/*
+ Find fs_fd from fd_table using filename.
+ return -1 if it doesn't exist.
+ */
+int find_fs_fd(char* filename){
+    for(int i=0;i<FS_OPEN_MAX_COUNT; i++){
+        if(!strcmp(filename, fd_table[i].file_name)){
+            return i;
+        }
+    }
+    return -1;
+}
+
 
 // Write to a file:
 int fs_write(int fd, void *buf, size_t count) {
