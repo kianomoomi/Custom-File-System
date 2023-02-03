@@ -526,7 +526,7 @@ int fs_write(int fd, void *buf, size_t count) {
 
 	num_blocks = ((count + (offset % BLOCK_SIZE)) / BLOCK_SIZE) + 1;
 
-	// write to the disk as much as we can (dont overload the disk)
+	// write to the disk as much as we can (don't overload the disk)
 	int num_free = get_num_FAT_free_blocks();
 	if (num_blocks > num_free) {
 		num_blocks = num_free;
@@ -540,7 +540,8 @@ int fs_write(int fd, void *buf, size_t count) {
 			left_shift = amount_to_write;
 		}
 
-		memcpy(bounce_buff + location, write_buf, left_shift);
+        if(i==0) block_read(curr_fat_index + superblock->data_start_index, bounce_buff); //correct offsets
+        memcpy(bounce_buff + location, write_buf, left_shift);
 		block_write(curr_fat_index + superblock->data_start_index, (void*)bounce_buff);
 		
 		// position array to left block 
