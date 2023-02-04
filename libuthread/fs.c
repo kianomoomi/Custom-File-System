@@ -533,8 +533,8 @@ bool is_in_read_cache(int index) {
     return false;
 }
 /*
- Find if the index is in read cache or not.
- between 0->1/3
+ Find if the index is in data disk.
+ between 2/3->1
  */
 bool is_in_disk(int index) {
     return !(is_in_write_cache(index)|| is_in_read_cache(index));
