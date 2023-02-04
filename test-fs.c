@@ -9,6 +9,7 @@
 
 #include <uthread.h>
 #include <fs.h>
+#include <time.h>
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
@@ -284,6 +285,7 @@ void usage(void)
 
 int main(int argc, char **argv)
 {
+//    long start=clock();
 	int i;
 	char *cmd;
 	struct thread_arg arg;
@@ -310,5 +312,8 @@ int main(int argc, char **argv)
 		usage();
 	}
 
+//    long end = clock();
+//    double execution_time = ((double)(end - start))/CLOCKS_PER_SEC;
+//    printf("%f\n", execution_time);
 	return 0;
 }
