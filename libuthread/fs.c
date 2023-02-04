@@ -501,7 +501,7 @@ int find_dirty_block_and_clean(int index) {
 
     time_t t;
     srand((unsigned) time(&t));
-    int selected_index = rand() % num_dirtys;
+    int selected_index = dirtys[rand() % num_dirtys];
     char bounce_buff[BLOCK_SIZE];
     block_read(selected_index + superblock->data_start_index, bounce_buff);
     block_write(index + superblock->data_start_index, (void *) bounce_buff);
